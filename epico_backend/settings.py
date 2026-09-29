@@ -14,6 +14,7 @@ from pathlib import Path
 import os
 from datetime import timedelta
 from dotenv import load_dotenv
+from django.db.backends.mysql.base import DatabaseWrapper
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -153,3 +154,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1), # El token durará 1 día completo
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
+
+
+# Permite que Django funcione con versiones de MariaDB anteriores a 10.11 (como tu 10.6)
+DatabaseWrapper.check_database_version_supported = lambda self: None
