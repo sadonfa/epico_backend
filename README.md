@@ -28,7 +28,8 @@ Sigue estos pasos para clonar y poner a marchar el proyecto en tu máquina local
     # o ve\Scripts\activate en Windows``
 
 3. **Instala las dependencias:**
-    ```pip install -r requirements.txt
+    ```bash 
+    pip install -r requirements.txt
 
 4. **Configura tus variables de entorno:**
     Crea un archivo .env en la raíz del proyecto basado en la estructura segura y añade tus credenciales:

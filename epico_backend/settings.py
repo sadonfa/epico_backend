@@ -83,11 +83,11 @@ WSGI_APPLICATION = 'epico_backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'epico_viajes_db',     # Nombre de tu base de datos en MySQL
-        'USER': 'sadonfa',     # Tu usuario (ej: root)
-        'PASSWORD': '1022353421',      # Tu contraseña
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('DB_USER'),
+        'PASSWORD': os.getenv('DB_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT'),
     }
 }
 
