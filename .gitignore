@@ -1,0 +1,34 @@
+# --- ENTORNO VIRTUAL ---
+venv/
+env/
+ENV/
+.venv/
+ger/
+.ger/
+
+# --- CONFIGURACIÓN Y SECRETOS (¡CRÍTICO!) ---
+.env
+local_settings.py
+
+# --- ARCHIVOS DE CACHÉ DE PYTHON ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# --- BASE DE DATOS LOCAL ---
+db.sqlite3
+
+# --- ARCHIVOS MULTIMEDIA Y ESTÁTICOS LOCALES ---
+media/
+staticfiles/
+
+# --- IDE / EDITOR ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- SISTEMA OPERATIVO ---
+.DS_Store
+Thumbs.db
