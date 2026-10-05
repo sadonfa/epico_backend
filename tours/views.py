@@ -3,32 +3,74 @@ import requests
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .models import Tour, Reserva
+from .models import Tour, Reserva, TourImagen
 from .serializers import TourSerializer, ReservaSerializer
 import uuid
 import hashlib
+from django.db import models
 
 
 class TourViewSet(viewsets.ModelViewSet):
     serializer_class = TourSerializer
+
     # 1. Función inteligente que decide qué lista devolver
     def get_queryset(self):
         # Si la petición tiene el token de administrador de React
         if self.request.user.is_authenticated:
-            return Tour.objects.all().order_by('-id') # Devuelve TODOS
-        
-        # Si es un cliente normal desde la web pública
-        return Tour.objects.filter(activo=True) # Devuelve SOLO LOS ACTIVOS
+            queryset = Tour.objects.all().order_by('-id')  # Devuelve TODOS
+        else:
+            queryset = Tour.objects.filter(activo=True)  # Devuelve SOLO LOS ACTIVOS
+
+        # 1. Filtrar por categoría si viene en la URL
+        categoria = self.request.query_params.get('categoria')
+        if categoria:
+            queryset = queryset.filter(categoria=categoria)
+
+        # 2. Filtrar por región si viene en la URL o parámetros
+        region = self.request.query_params.get('region')
+        if region:
+            queryset = queryset.filter(region=region)
+
+        return queryset
 
     # 2. Seguridad: Quién puede hacer qué
     def get_permissions(self):
         if self.action in ['list', 'retrieve']:
-            # El público puede ver la lista de tours
             permission_classes = [AllowAny]
         else:
-            # Solo tú (el admin) puedes crear, editar o borrar
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
+
+    # 3. Crear tour y procesar múltiples imágenes de la galería
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        tour = serializer.save()
+
+        # Capturamos las múltiples imágenes enviadas desde el FormData de React
+        imagenes_galeria = request.FILES.getlist('galeria_imagenes')
+        for img_file in imagenes_galeria:
+            TourImagen.objects.create(tour=tour, imagen=img_file)
+
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    # 4. Actualizar tour y añadir nuevas imágenes a la galería si se seleccionaron
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        tour = serializer.save()
+
+        # Procesar imágenes adicionales de la galería en la actualización
+        imagenes_galeria = request.FILES.getlist('galeria_imagenes')
+        if imagenes_galeria:
+            for img_file in imagenes_galeria:
+                TourImagen.objects.create(tour=tour, imagen=img_file)
+
+        return Response(serializer.data)
 
 class ReservaViewSet(viewsets.ModelViewSet):
     queryset = Reserva.objects.all()

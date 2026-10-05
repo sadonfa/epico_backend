@@ -1,10 +1,19 @@
 from rest_framework import serializers
-from .models import Tour, Reserva
+from .models import Tour, Reserva, TourImagen
+
+class TourImagenSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TourImagen
+        fields = ['id', 'imagen']
 
 class TourSerializer(serializers.ModelSerializer):
+    # Esto inyectará una lista llamada 'galeria' con todas las fotos adicionales
+    galeria = TourImagenSerializer(many=True, read_only=True)
+    imagen = serializers.ImageField(required=False, allow_null=True)
+
     class Meta:
         model = Tour
-        fields = '__all__' # Exporta todos los campos (id, titulo, precio, incluye, itinerario, etc.)
+        fields = '__all__'
 
 class ReservaSerializer(serializers.ModelSerializer):
     class Meta:
