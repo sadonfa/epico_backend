@@ -39,6 +39,7 @@ class Tour(models.Model):
     imagen = models.ImageField(upload_to='tours_images/')
     descripcion = models.TextField()
     incluye = models.JSONField(default=list)
+    no_incluye = models.JSONField(default=list)
     itinerario = models.JSONField(default=list)
     activo = models.BooleanField(default=True)
 
