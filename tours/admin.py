@@ -1,5 +1,10 @@
 from django.contrib import admin
-from .models import Tour, Reserva
+from .models import Tour, Reserva, Subcategoria
+
+@admin.register(Subcategoria)
+class SubcategoriaAdmin(admin.ModelAdmin):
+    list_display = ('id', 'nombre', 'slug')
+    prepopulated_fields = {'slug': ('nombre',)} # Autocompleta el slug al escribir el nombre
 
 @admin.register(Tour)
 class TourAdmin(admin.ModelAdmin):
@@ -17,3 +22,4 @@ class ReservaAdmin(admin.ModelAdmin):
     list_display = ('nombre_cliente', 'tour', 'fecha_viaje', 'estado_pago', 'total_pagar')
     list_filter = ('estado_pago', 'fecha_viaje')
     search_fields = ('nombre_cliente', 'email_cliente', 'transaccion_id')
+

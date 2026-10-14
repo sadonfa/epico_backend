@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tour, Reserva, TourImagen
+from .models import Tour, Reserva, TourImagen, Subcategoria
 
 class TourImagenSerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,6 +13,11 @@ class TourSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tour
+        fields = '__all__'
+
+class SubcategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategoria
         fields = '__all__'
 
 class ReservaSerializer(serializers.ModelSerializer):

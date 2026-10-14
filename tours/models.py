@@ -1,5 +1,19 @@
 from django.db import models
 
+class Subcategoria(models.Model):
+    nombre = models.CharField(max_length=150, unique=True)
+    slug = models.SlugField(max_length=150, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            from django.utils.text import slugify
+            self.slug = slugify(self.nombre)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.nombre
+
+
 class Tour(models.Model):
     CATEGORIAS = [
         ('playas-islas', 'Playas & Islas'),
@@ -36,6 +50,7 @@ class Tour(models.Model):
     titulo = models.CharField(max_length=200)
     dias = models.CharField(max_length=100)
     precio = models.IntegerField()  # Guardado como entero
+    precio_ninos = models.IntegerField(null=True, blank=True)
     imagen = models.ImageField(upload_to='tours_images/')
     descripcion = models.TextField()
     incluye = models.JSONField(default=list)
@@ -44,12 +59,22 @@ class Tour(models.Model):
     activo = models.BooleanField(default=True)
 
     categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='experiencia')
+    subcategoria = models.ForeignKey(
+        Subcategoria, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='tours'
+    )
     destino_slug = models.CharField(max_length=50, choices=DESTINOS_CHOICES, default='cartagena')
     region = models.CharField(max_length=20, choices=REGIONES_CHOICES, default='colombia')
     es_popular = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.titulo} ({self.get_destino_slug_display()})"
+
+
+
 
 
 class Reserva(models.Model):

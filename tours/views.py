@@ -3,8 +3,8 @@ import requests
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .models import Tour, Reserva, TourImagen
-from .serializers import TourSerializer, ReservaSerializer
+from .models import Tour, Reserva, TourImagen, Subcategoria
+from .serializers import TourSerializer, ReservaSerializer, SubcategoriaSerializer
 import uuid
 import hashlib
 from django.db import models
@@ -71,6 +71,11 @@ class TourViewSet(viewsets.ModelViewSet):
                 TourImagen.objects.create(tour=tour, imagen=img_file)
 
         return Response(serializer.data)
+
+class SubcategoriaViewSet(viewsets.ModelViewSet):
+    queryset = Subcategoria.objects.all()
+    serializer_class = SubcategoriaSerializer
+    permission_classes = [AllowAny]
 
 class ReservaViewSet(viewsets.ModelViewSet):
     queryset = Reserva.objects.all()
