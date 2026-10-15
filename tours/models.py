@@ -26,6 +26,7 @@ class Tour(models.Model):
         ('yate', 'Renta de Botes y Yates'),
         ('hotel', 'Hoteles'),
         ('transporte', 'Transportes'),
+        ('nacionales', 'Tours nacionales'),
         ('internacional', 'Tours Internacionales'),
         ('a_medida', 'A Medida (Preguntar)'),
     ]
@@ -57,7 +58,8 @@ class Tour(models.Model):
     no_incluye = models.JSONField(default=list)
     itinerario = models.JSONField(default=list)
     activo = models.BooleanField(default=True)
-
+    # En tu models.py (Tour)
+    edad_maxima_nino = models.IntegerField(default=10, help_text="Edad máxima para aplicar tarifa de niño")
     categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='experiencia')
     subcategoria = models.ForeignKey(
         Subcategoria, 
