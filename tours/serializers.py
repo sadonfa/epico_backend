@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from .models import Tour, Reserva, TourImagen, Subcategoria, TarifaFechaTour
 
+
+
 class TourImagenSerializer(serializers.ModelSerializer):
     class Meta:
         model = TourImagen
@@ -11,11 +13,17 @@ class TarifaFechaTourSerializer(serializers.ModelSerializer):
         model = TarifaFechaTour
         fields = ['id', 'tour', 'fecha_inicio', 'fecha_fin', 'precio_especial']
 
+class SubcategoriaSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subcategoria
+        fields = '__all__'
+
 class TourSerializer(serializers.ModelSerializer):
     # Esto inyectará una lista llamada 'galeria' con todas las fotos adicionales
     galeria = TourImagenSerializer(many=True, read_only=True)
     imagen = serializers.ImageField(required=False, allow_null=True)
     tarifas_especiales = TarifaFechaTourSerializer(many=True, read_only=True)
+    subcategoria_nombre = serializers.ReadOnlyField(source='subcategoria.nombre')
 
     class Meta:
         model = Tour
@@ -23,10 +31,7 @@ class TourSerializer(serializers.ModelSerializer):
 
 
 
-class SubcategoriaSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subcategoria
-        fields = '__all__'
+
 
 class ReservaSerializer(serializers.ModelSerializer):
     class Meta:
