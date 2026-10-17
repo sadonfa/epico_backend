@@ -3,8 +3,8 @@ import requests
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .models import Tour, Reserva, TourImagen, Subcategoria
-from .serializers import TourSerializer, ReservaSerializer, SubcategoriaSerializer
+from .models import Tour, Reserva, TourImagen, Subcategoria, TarifaFechaTour
+from .serializers import TourSerializer, ReservaSerializer, SubcategoriaSerializer, TarifaFechaTourSerializer
 import uuid
 import hashlib
 from django.db import models
@@ -186,3 +186,8 @@ class ReservaViewSet(viewsets.ModelViewSet):
                 {'error': error_msg, 'detalles': resultado},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+
+class TarifaFechaTourViewSet(viewsets.ModelViewSet):
+    queryset = TarifaFechaTour.objects.all()
+    serializer_class = TarifaFechaTourSerializer
+    permission_classes = [IsAuthenticated]

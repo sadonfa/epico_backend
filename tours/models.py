@@ -126,3 +126,13 @@ class TourImagen(models.Model):
     
     def __str__(self):
         return f"Imagen para {self.tour.titulo}"
+
+
+class TarifaFechaTour(models.Model):
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='tarifas_especiales')
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    precio_especial = models.IntegerField() # Nuevo precio en COP para este rango
+
+    def __str__(self):
+        return f"{self.tour.titulo} ({self.fecha_inicio} al {self.fecha_fin}): ${self.precio_especial}"
