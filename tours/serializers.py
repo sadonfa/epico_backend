@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Tour, Reserva, TourImagen, Subcategoria, TarifaFechaTour
+from .models import Tour, Reserva, TourImagen, Subcategoria, TarifaFechaTour, BannerPromocional
 
 
 
@@ -30,7 +30,10 @@ class TourSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-
+class BannerPromocionalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BannerPromocional
+        fields = '__all__'
 
 
 class ReservaSerializer(serializers.ModelSerializer):

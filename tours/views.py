@@ -1,10 +1,10 @@
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 import requests
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .models import Tour, Reserva, TourImagen, Subcategoria, TarifaFechaTour
-from .serializers import TourSerializer, ReservaSerializer, SubcategoriaSerializer, TarifaFechaTourSerializer
+from .models import Tour, Reserva, TourImagen, Subcategoria, TarifaFechaTour, BannerPromocional
+from .serializers import TourSerializer, ReservaSerializer, SubcategoriaSerializer, TarifaFechaTourSerializer, TourImagenSerializer, BannerPromocionalSerializer
 import uuid
 import hashlib
 from django.db import models
@@ -191,3 +191,13 @@ class TarifaFechaTourViewSet(viewsets.ModelViewSet):
     queryset = TarifaFechaTour.objects.all()
     serializer_class = TarifaFechaTourSerializer
     permission_classes = [IsAuthenticated]
+
+class TourImagenViewSet(viewsets.ModelViewSet):
+    queryset = TourImagen.objects.all()
+    serializer_class = TourImagenSerializer
+    permission_classes = [IsAuthenticated]
+
+class BannerPromocionalViewSet(viewsets.ModelViewSet):
+    queryset = BannerPromocional.objects.all()
+    serializer_class = BannerPromocionalSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]

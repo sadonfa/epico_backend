@@ -112,13 +112,12 @@ class Reserva(models.Model):
 
 
 class BannerPromocional(models.Model):
-    seccion = models.CharField(max_length=100, default='home_viaja_medida', unique=True)
-    imagen_desktop = models.ImageField(upload_to='banners_images/')
-    imagen_mobile = models.ImageField(upload_to='banners_images/', blank=True, null=True)
-    fecha_actualizacion = models.DateTimeField(auto_now=True)
+    imagen_desktop = models.ImageField(upload_to='banners/', null=True, blank=True)
+    imagen_mobile = models.ImageField(upload_to='banners/', null=True, blank=True)
+    actualizado_el = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Banner: {self.seccion}"
+        return f"Banner Promocional #{self.id}"
 
 class TourImagen(models.Model):
     tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='galeria')
