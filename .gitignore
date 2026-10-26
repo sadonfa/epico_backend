@@ -19,6 +19,10 @@ __pycache__/
 # --- BASE DE DATOS LOCAL ---
 db.sqlite3
 
+# --- MIGRACIONES DE DJANGO ---
+*/migrations/
+!*/migrations/__init__.py
+
 # --- ARCHIVOS MULTIMEDIA Y ESTÁTICOS LOCALES ---
 media/
 staticfiles/

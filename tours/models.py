@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 
 class Subcategoria(models.Model):
     nombre = models.CharField(max_length=150, unique=True)
@@ -13,41 +14,49 @@ class Subcategoria(models.Model):
     def __str__(self):
         return self.nombre
 
+class Categoria(models.Model):
+    nombre = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True, blank=True, help_text="Ej: playas-islas, experiencias")
 
-class Tour(models.Model):
-    CATEGORIAS = [
-        ('playas-islas', 'Playas & Islas'),
-        ('hoteles-posadas', 'Hoteles & Posadas'),
-        ('viajes-nacionales', 'Viajes nacionales'),
-        ('viajes-internacionales', 'Viajes internacionales'),
-        ('botes-privados', 'Botes & Privados'),
-        ('planes-familias', 'Planes para familias'),
-        ('experiencia', 'Tour y Experiencias'),
-        ('yate', 'Renta de Botes y Yates'),
-        ('hotel', 'Hoteles'),
-        ('transporte', 'Transportes'),
-        ('nacionales', 'Tours nacionales'),
-        ('internacional', 'Tours Internacionales'),
-        ('a_medida', 'A Medida (Preguntar)'),
-    ]
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            # Genera un slug limpio eliminando caracteres especiales como '&'
+            self.slug = slugify(self.nombre)
+        super().save(*args, **kwargs)
 
-    # Ciudades y destinos soportados
-    DESTINOS_CHOICES = [
-        ('cartagena', 'Cartagena'),
-        ('san_andres', 'San Andrés'),
-        ('santa_marta', 'Santa Marta'),
-        ('medellin', 'Medellín'),
-        ('eje_cafetero', 'Eje Cafetero'),
-        ('bogota', 'Bogotá'),
-        ('cancun', 'Cancún (Internacional)'),
-        ('madrid', 'Madrid (Internacional)'),
-    ]
+    class Meta:
+        verbose_name = "Categoría"
+        verbose_name_plural = "Categorías"
 
+    def __str__(self):
+        return self.nombre
+
+
+class Destino(models.Model):
     REGIONES_CHOICES = [
         ('colombia', 'Colombia'),
         ('internacional', 'Internacional'),
     ]
 
+    nombre = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=100, unique=True, blank=True, null=True, help_text="Ej: cartagena, san_andres")
+    region = models.CharField(max_length=50, choices=REGIONES_CHOICES, default='colombia')
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.nombre)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        verbose_name = "Destino"
+        verbose_name_plural = "Destinos"
+
+    def __str__(self):
+        return f"{self.nombre} ({self.get_region_display()})"
+
+
+class Tour(models.Model):
+   
     titulo = models.CharField(max_length=200)
     dias = models.CharField(max_length=100)
     precio = models.IntegerField()  # Guardado como entero
@@ -58,9 +67,14 @@ class Tour(models.Model):
     no_incluye = models.JSONField(default=list)
     itinerario = models.JSONField(default=list)
     activo = models.BooleanField(default=True)
-    # En tu models.py (Tour)
     edad_maxima_nino = models.IntegerField(default=10, help_text="Edad máxima para aplicar tarifa de niño")
-    categoria = models.CharField(max_length=50, choices=CATEGORIAS, default='experiencia')
+    categoria = models.ForeignKey(
+        Categoria, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='tours'
+    )
     subcategoria = models.ForeignKey(
         Subcategoria, 
         on_delete=models.SET_NULL, 
@@ -68,12 +82,25 @@ class Tour(models.Model):
         blank=True, 
         related_name='tours'
     )
-    destino_slug = models.CharField(max_length=50, choices=DESTINOS_CHOICES, default='cartagena')
-    region = models.CharField(max_length=20, choices=REGIONES_CHOICES, default='colombia')
+    destino_slug = models.ForeignKey(
+        Destino, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='tours'
+    )
+    ubicacion = models.CharField(
+        max_length=150, 
+        blank=True, 
+        null=True, 
+        help_text="Ej: Isla Barú, Playa Blanca, Centro Histórico"
+    )
     es_popular = models.BooleanField(default=False)
+    es_paquete = models.BooleanField(default=False, help_text="Marcar si es un paquete turístico completo")
 
     def __str__(self):
-        return f"{self.titulo} ({self.get_destino_slug_display()})"
+        nombre_destino = self.destino_slug.nombre if self.destino_slug else "Sin destino"
+        return f"{self.titulo} ({nombre_destino})"
 
 
 
@@ -135,3 +162,30 @@ class TarifaFechaTour(models.Model):
 
     def __str__(self):
         return f"{self.tour.titulo} ({self.fecha_inicio} al {self.fecha_fin}): ${self.precio_especial}"
+
+class FechaBloqueadaTour(models.Model):
+    tour = models.ForeignKey(Tour, on_delete=models.CASCADE, related_name='fechas_bloqueadas')
+    fecha_inicio = models.DateField()
+    fecha_fin = models.DateField()
+    motivo = models.CharField(max_length=150, blank=True, null=True, help_text="Ej: Mantenimiento, Cupo Lleno")
+
+    def __str__(self):
+        return f"{self.tour.titulo} - Cerrado: {self.fecha_inicio} a {self.fecha_fin}"
+
+
+class Recomendacion(models.Model):
+    titulo = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    imagen = models.ImageField(upload_to='recomendaciones_images/')
+    extracto = models.TextField(help_text="Resumen corto que se muestra en la tarjeta")
+    contenido = models.TextField(help_text="Contenido completo del artículo o recomendación")
+    fecha_publicacion = models.DateField(auto_now_add=True)
+    activo = models.BooleanField(default=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.titulo)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.titulo

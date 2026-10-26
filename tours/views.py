@@ -3,8 +3,8 @@ import requests
 from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .models import Tour, Reserva, TourImagen, Subcategoria, TarifaFechaTour, BannerPromocional
-from .serializers import TourSerializer, ReservaSerializer, SubcategoriaSerializer, TarifaFechaTourSerializer, TourImagenSerializer, BannerPromocionalSerializer
+from .models import Tour, Reserva, TourImagen, Subcategoria, TarifaFechaTour, BannerPromocional, FechaBloqueadaTour, Categoria, Destino, Recomendacion
+from .serializers import TourSerializer, ReservaSerializer, SubcategoriaSerializer, TarifaFechaTourSerializer, TourImagenSerializer, BannerPromocionalSerializer, FechaBloqueadaSerializer, CategoriaSerializer, DestinoSerializer, RecomendacionSerializer
 import uuid
 import hashlib
 from django.db import models
@@ -192,6 +192,11 @@ class TarifaFechaTourViewSet(viewsets.ModelViewSet):
     serializer_class = TarifaFechaTourSerializer
     permission_classes = [IsAuthenticated]
 
+class FechaBloqueadaViewSet(viewsets.ModelViewSet):
+    queryset = FechaBloqueadaTour.objects.all()
+    serializer_class = FechaBloqueadaSerializer
+    permission_classes = [IsAuthenticated]
+
 class TourImagenViewSet(viewsets.ModelViewSet):
     queryset = TourImagen.objects.all()
     serializer_class = TourImagenSerializer
@@ -201,3 +206,23 @@ class BannerPromocionalViewSet(viewsets.ModelViewSet):
     queryset = BannerPromocional.objects.all()
     serializer_class = BannerPromocionalSerializer
     permission_classes = [IsAuthenticatedOrReadOnly]
+
+class CategoriaViewSet(viewsets.ModelViewSet):
+    queryset = Categoria.objects.all()
+    serializer_class = CategoriaSerializer
+    permission_classes = [IsAuthenticated]
+
+class DestinoViewSet(viewsets.ModelViewSet):
+    queryset = Destino.objects.all()
+    serializer_class = DestinoSerializer
+    permission_classes = [AllowAny]
+
+class RecomendacionViewSet(viewsets.ModelViewSet):
+    queryset = Recomendacion.objects.all().order_by('-fecha_publicacion')
+    serializer_class = RecomendacionSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        if not self.request.user.is_authenticated:
+            queryset = queryset.filter(activo=True)
+        return queryset
